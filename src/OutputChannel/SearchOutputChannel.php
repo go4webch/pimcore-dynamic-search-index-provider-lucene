@@ -148,6 +148,8 @@ class SearchOutputChannel implements OutputChannelInterface
 
         $result = $index->find($query);
 
+        $result = $this->getValidHits($result);
+
         if (count($result) > $this->options['result_limit']) {
             $result = array_slice($result, 0, $this->options['result_limit']);
         }
@@ -162,5 +164,39 @@ class SearchOutputChannel implements OutputChannelInterface
         $searchContainer->result->setHitCount(count($result));
 
         return $searchContainer;
+    }
+
+    protected function getValidHits($queryHits)
+    {
+        $validHits = [];
+
+        if ($queryHits === null) {
+            $validHits = $queryHits;
+            return $validHits;
+        }
+
+        $currentHost =  $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? 'not-valid-host';
+
+        $allowedHosts = [];
+
+        $allowedHosts[] = $currentHost;
+
+        /** @var \Zend_Search_Lucene_Search_QueryHit $hit */
+        foreach ($queryHits as $hit) {
+
+            try {
+                $url = $hit->getDocument()->getField('uri');
+            } catch (\Zend_Search_Lucene_Exception $e) {
+                continue;
+            }
+
+            $currentHostname = parse_url($url->value, PHP_URL_HOST);
+
+            if (in_array($currentHostname, $allowedHosts)) {
+                $validHits[] = $hit;
+            }
+        }
+
+        return $validHits;
     }
 }
