@@ -63,7 +63,7 @@ class LuceneIndexProvider implements IndexProviderInterface
         }
 
         try {
-            $this->storageBuilder->createGenesisIndex($this->options, true);
+            $this->storageBuilder->createGenesisIndex($this->options);
         } catch (\Throwable $e) {
             throw new ProviderException($e->getMessage(), DsLuceneBundle::PROVIDER_NAME, $e);
         }
