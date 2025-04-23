@@ -80,12 +80,6 @@ class LuceneIndexProvider implements IndexProviderInterface
 
             return;
         }
-
-        try {
-            $this->storageBuilder->riseGenesisIndexToStable($this->options);
-        } catch (\Throwable $e) {
-            throw new ProviderException($e->getMessage(), DsLuceneBundle::PROVIDER_NAME, $e);
-        }
     }
 
     public function cancelledShutdown(ContextDefinitionInterface $contextDefinition): void
